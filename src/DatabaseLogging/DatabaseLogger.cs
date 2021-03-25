@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -13,17 +14,22 @@ namespace DatabaseLogging
     {
         private readonly Queue<LogMessage> pendingLogs = new();
         private bool disposed;
+        private IMemoryCache memoryCache;
         Context context;
 
-        public DatabaseLogger(Context context, ThreadPriority threadPriority)
+        public DatabaseLogger(
+            Context context,
+            ThreadPriority threadPriority,
+            IMemoryCache memoryCache)
         {
             this.context = context;
+            this.memoryCache = memoryCache;
             new Thread(ProcessLogs) { Priority = threadPriority }.Start();
         }
 
         private void ProcessLogs(object obj)
         {
-            while (!disposed || pendingLogs.Count > 0  )
+            while (!disposed || pendingLogs.Count > 0)
             {
                 if (pendingLogs.Count > 0)
                 {
@@ -55,7 +61,42 @@ namespace DatabaseLogging
 
             if (state is IReadOnlyList<KeyValuePair<string, object>> kvps)
             {
-                logProperties = ImmutableList.Create(kvps.Select(kvp => new LogProperty(kvp.Key, kvp.Value.ToString())).ToArray());
+                foreach (var kvp in kvps)
+                {
+                    memoryCache.GetOrCreate($"{nameof(LogPropertyKey)}-{kvp.Key}", (entry) =>
+                    {
+                        var logPropertyKey = context.LogPropertyKeys.First(lpk => lpk.KeyName == kvp.Key);
+
+                        if (logPropertyKey != null) return logPropertyKey;
+
+                        logPropertyKey = new LogPropertyKey(Guid.NewGuid(), kvp.Key);
+
+                        context.LogPropertyKeys.Add(logPropertyKey);
+
+                        context.SaveChanges();
+
+                        return logPropertyKey;
+                    }
+                    );
+                }
+
+
+                logProperties = ImmutableList.Create(kvps.Select(kvp => new LogProperty(Guid.NewGuid(),
+                memoryCache.GetOrCreate($"{nameof(LogPropertyKey)}-{kvp.Key}", (entry) =>
+                {
+                    var logPropertyKey = context.LogPropertyKeys.First(lpk => lpk.KeyName == kvp.Key);
+
+                    if (logPropertyKey != null) return logPropertyKey;
+
+                    logPropertyKey = new LogPropertyKey(Guid.NewGuid(), kvp.Key);
+
+                    context.LogPropertyKeys.Add(logPropertyKey);
+
+                    context.SaveChanges();
+
+                    return logPropertyKey;
+                }
+                ).Key, kvp.Value.ToString())).ToArray());
             }
 
             pendingLogs.Enqueue(new LogMessage(Guid.NewGuid(), logLevel, eventId.Id, exception?.ToString(), message, DateTimeOffset.UtcNow, logProperties));

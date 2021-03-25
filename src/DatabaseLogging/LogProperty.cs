@@ -1,14 +1,20 @@
-﻿namespace DatabaseLogging
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+
+namespace DatabaseLogging
 {
     public class LogProperty
     {
-        public LogProperty(string key, string value)
+        public LogProperty(Guid key, Guid logPropertyKeyKey, string value)
         {
             Key = key;
+            LogPropertyKeyKey = logPropertyKeyKey;
             Value = value;
         }
 
-        public string Key { get; }
+        [Key]
+        public Guid Key { get; }
+        public Guid LogPropertyKeyKey { get; }
         public string Value { get; }
     }
 }
