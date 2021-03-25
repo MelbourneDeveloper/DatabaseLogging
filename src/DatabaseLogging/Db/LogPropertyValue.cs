@@ -1,11 +1,12 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DatabaseLogging
 {
-    public class LogProperty
+    public class LogPropertyValue
     {
-        public LogProperty(Guid key, Guid logPropertyKeyKey, string value)
+        public LogPropertyValue(Guid key, Guid logPropertyKeyKey, string value)
         {
             Key = key;
             LogPropertyKeyKey = logPropertyKeyKey;

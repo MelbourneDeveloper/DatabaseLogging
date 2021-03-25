@@ -15,7 +15,7 @@ namespace DatabaseLogging
          string? exception,
          string message,
          DateTimeOffset logDateTime,
-         ImmutableList<LogProperty> logProperties
+         ImmutableList<LogPropertyValue> logProperties
             )
         {
             Key = key;
@@ -34,7 +34,7 @@ namespace DatabaseLogging
         public string? Exception { get; }
         public string Message { get; }
         public DateTimeOffset LogDateTime { get; }
-        public ImmutableList<LogProperty> LogProperties { get; }
+        public ImmutableList<LogPropertyValue> LogProperties { get; }
     }
 
 }

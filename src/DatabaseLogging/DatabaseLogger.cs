@@ -57,7 +57,7 @@ namespace DatabaseLogging
 
             var message = formatter(state, exception);
 
-            var logProperties = ImmutableList<LogProperty>.Empty;
+            var logProperties = ImmutableList<LogPropertyValue>.Empty;
 
             if (state is IReadOnlyList<KeyValuePair<string, object>> kvps)
             {
@@ -73,15 +73,13 @@ namespace DatabaseLogging
 
                         context.LogPropertyKeys.Add(logPropertyKey);
 
-                        context.SaveChanges();
-
                         return logPropertyKey;
                     }
                     );
                 }
 
 
-                logProperties = ImmutableList.Create(kvps.Select(kvp => new LogProperty(Guid.NewGuid(),
+                logProperties = ImmutableList.Create(kvps.Select(kvp => new LogPropertyValue(Guid.NewGuid(),
                 memoryCache.GetOrCreate($"{nameof(LogPropertyKey)}-{kvp.Key}", (entry) =>
                 {
                     var logPropertyKey = context.LogPropertyKeys.First(lpk => lpk.KeyName == kvp.Key);
@@ -91,8 +89,6 @@ namespace DatabaseLogging
                     logPropertyKey = new LogPropertyKey(Guid.NewGuid(), kvp.Key);
 
                     context.LogPropertyKeys.Add(logPropertyKey);
-
-                    context.SaveChanges();
 
                     return logPropertyKey;
                 }
