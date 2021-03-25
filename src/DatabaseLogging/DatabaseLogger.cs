@@ -3,16 +3,44 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading;
 
 namespace DatabaseLogging
 {
-    public class DatabaseLogger : ILogger
+#pragma warning disable CA1063 // Implement IDisposable Correctly
+    public class DatabaseLogger : ILogger, IDisposable
+#pragma warning restore CA1063 // Implement IDisposable Correctly
     {
         private readonly Queue<LogMessage> pendingLogs = new();
+        private bool disposed;
+        Context context;
+
+        public DatabaseLogger(Context context, ThreadPriority threadPriority)
+        {
+            this.context = context;
+            new Thread(ProcessLogs) { Priority = threadPriority }.Start();
+        }
+
+        private void ProcessLogs(object obj)
+        {
+            while (!disposed || pendingLogs.Count > 0  )
+            {
+                if (pendingLogs.Count > 0)
+                {
+                    var logMessage = pendingLogs.Dequeue();
+                    context.Add(logMessage);
+                    context.SaveChanges();
+                }
+                else
+                {
+                    Thread.Sleep(10);
+                }
+            }
+        }
 
         public IDisposable BeginScope<TState>(TState state)
         {
-            throw new NotImplementedException();
+            return new NullDisposable();
         }
 
         public bool IsEnabled(LogLevel logLevel) => true;
@@ -31,6 +59,15 @@ namespace DatabaseLogging
             }
 
             pendingLogs.Enqueue(new LogMessage(Guid.NewGuid(), logLevel, eventId.Id, exception?.ToString(), message, DateTimeOffset.UtcNow, logProperties));
+        }
+
+#pragma warning disable CA1063 // Implement IDisposable Correctly
+#pragma warning disable CA1816 // Dispose methods should call SuppressFinalize
+        public void Dispose()
+#pragma warning restore CA1816 // Dispose methods should call SuppressFinalize
+#pragma warning restore CA1063 // Implement IDisposable Correctly
+        {
+            disposed = true;
         }
     }
 
