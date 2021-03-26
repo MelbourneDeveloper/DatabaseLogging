@@ -1,12 +1,17 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Immutable;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace DatabaseLogging.Db
 {
     public class LogMessage
     {
+        public LogMessage() : this(Guid.NewGuid(), LogLevel.Trace, default, null, "", DateTimeOffset.UtcNow, new List<LogPropertyValue>())
+        {
+            Message = "";
+        }
+
         public LogMessage
             (
          Guid key,
@@ -15,7 +20,9 @@ namespace DatabaseLogging.Db
          string? exception,
          string message,
          DateTimeOffset logDateTime,
-         ImmutableList<LogPropertyValue> logProperties
+#pragma warning disable CA1002 // Do not expose generic lists
+         List<LogPropertyValue> logProperties
+#pragma warning restore CA1002 // Do not expose generic lists
             )
         {
             Key = key;
@@ -28,13 +35,15 @@ namespace DatabaseLogging.Db
         }
 
         [Key]
-        public Guid Key { get; }
-        public LogLevel LogLevel { get; }
-        public Guid EventIdKey { get; }
-        public string? Exception { get; }
-        public string Message { get; }
-        public DateTimeOffset LogDateTime { get; }
-        public ImmutableList<LogPropertyValue> LogProperties { get; }
+        public Guid Key { get; set; }
+        public LogLevel LogLevel { get; set; }
+        public Guid EventIdKey { get; set; }
+        public string? Exception { get; set; }
+        public string Message { get; set; }
+        public DateTimeOffset LogDateTime { get; set; }
+#pragma warning disable CA1002 // Do not expose generic lists
+        public List<LogPropertyValue> LogProperties { get; }
+#pragma warning restore CA1002 // Do not expose generic lists
     }
 
 }

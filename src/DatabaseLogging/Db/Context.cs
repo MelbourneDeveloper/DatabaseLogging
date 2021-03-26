@@ -7,16 +7,18 @@ namespace DatabaseLogging.Db
     {
         Action<DbContextOptionsBuilder> configureAction;
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         public Context(Action<DbContextOptionsBuilder> configureAction)
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         {
             this.configureAction = configureAction;
             _ = Database.EnsureCreated();
         }
 
-        public LogMessages LogMessages { get; set; } = new LogMessages();
-        public LogPropertyKeys LogPropertyKeys { get; set; } = new LogPropertyKeys();
-        public LogPropertyValues LogPropertyValues { get; set; } = new LogPropertyValues();
-        public LogEvents LogEvents { get; set; } = new LogEvents();
+        public DbSet<LogMessage> LogMessages { get; set; }
+        public DbSet<LogPropertyKey> LogPropertyKeys { get; set; }
+        public DbSet<LogPropertyValue> LogPropertyValues { get; set; }
+        public DbSet<LogEvent> LogEvents { get; set; }
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

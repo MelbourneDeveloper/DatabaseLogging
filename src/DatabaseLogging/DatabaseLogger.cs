@@ -39,7 +39,7 @@ namespace DatabaseLogging
 
                     var logEvent = memoryCache.GetOrCreate($"{nameof(LogEvent)}-{logMessageRecord.EventId}", (entry) =>
                      {
-                         var logEvent = context.LogEvents.FirstOrDefault(lpk => lpk.Id == logMessageRecord.EventId);
+                         var logEvent = context.LogEvents.Where(lpk => lpk.Id == logMessageRecord.EventId).FirstOrDefault();
 
                          if (logEvent != null) return logEvent;
 
@@ -57,25 +57,22 @@ namespace DatabaseLogging
                         logMessageRecord.Exception,
                         logMessageRecord.Message,
                         logMessageRecord.LogDateTime,
-                        ImmutableList.Create
+                        logMessageRecord.LogProperties.Select(lp => new LogPropertyValue
                         (
-                            logMessageRecord.LogProperties.Select(lp => new LogPropertyValue
-                            (
-                                Guid.NewGuid(),
-                                memoryCache.GetOrCreate($"{nameof(LogPropertyKey)}-{lp.Key}", (entry) =>
-                                {
-                                    var logPropertyKey = context.LogPropertyKeys.FirstOrDefault(lpk => lpk.KeyName == lp.Key);
+                            Guid.NewGuid(),
+                            memoryCache.GetOrCreate($"{nameof(LogPropertyKey)}-{lp.Key}", (entry) =>
+                            {
+                                var logPropertyKey = context.LogPropertyKeys.FirstOrDefault(lpk => lpk.KeyName == lp.Key);
 
-                                    if (logPropertyKey != null) return logPropertyKey;
+                                if (logPropertyKey != null) return logPropertyKey;
 
-                                    logPropertyKey = new LogPropertyKey(Guid.NewGuid(), lp.Key);
+                                logPropertyKey = new LogPropertyKey(Guid.NewGuid(), lp.Key);
 
-                                    context.LogPropertyKeys.Add(logPropertyKey);
+                                context.LogPropertyKeys.Add(logPropertyKey);
 
-                                    return logPropertyKey;
-                                }).Key, false, lp.Value
-                                )).ToArray()
-                            )
+                                return logPropertyKey;
+                            }).Key, false, lp.Value
+                            )).ToList()
                         );
 
                     context.LogMessages.Add(logMessage);
