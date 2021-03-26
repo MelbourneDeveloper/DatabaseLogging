@@ -5,3 +5,6 @@ dotnet_diagnostic.CA1014.severity = none
 
 # IDE0051: Remove unused private members
 dotnet_diagnostic.IDE0051.severity = error
+
+# IDE0058: Expression value is never used
+csharp_style_unused_value_expression_statement_preference = unused_local_variable

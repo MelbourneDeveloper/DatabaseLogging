@@ -6,14 +6,10 @@ namespace DatabaseLogging
 {
     public class DatabaseLoggerOptions : IDatabaseLoggerOptions
     {
-        public DatabaseLoggerOptions(Func<Context> getDatabaseContext)
-        {
-            GetDatabaseContext = getDatabaseContext;
-        }
-
+  
         public ThreadPriority ThreadPriority { get; set; } = ThreadPriority.BelowNormal;
 
-        public Func<Context> GetDatabaseContext { get; }
+        public Func<Context> GetDatabaseContext { get; set; } = () => throw new InvalidOperationException($"You must initialize {nameof(GetDatabaseContext)} in the options for DatabaseLogging");
 
         public bool IncludeScopes { get; set; } = true;
 

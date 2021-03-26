@@ -2,6 +2,7 @@ using DatabaseLogging.Db;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
@@ -14,26 +15,47 @@ namespace DatabaseLogging.Tests
         [TestMethod]
         public async Task TestMethod1()
         {
-#pragma warning disable CA2000 // Dispose objects before losing scope
-            var context = new Context((builder) =>
+            var serviceCollection = new ServiceCollection();
+            serviceCollection.AddLogging((builder) =>
             {
-                var connection = new SqliteConnection("Data Source=Log.db");
-                connection.Open();
+                builder.AddDatabase((options) =>
+                {
+                    options.GetDatabaseContext = () =>
+                    {
+                        var context = new Context((builder) =>
+                        {
+                            var connection = new SqliteConnection("Data Source=Log.db");
+                            connection.Open();
 
-                var command = connection.CreateCommand();
+                            var command = connection.CreateCommand();
 
-                //Create the database if it doesn't already exist
-                command.CommandText = "PRAGMA foreign_keys = ON;";
-                _ = command.ExecuteNonQuery();
-                _ = builder.UseSqlite(connection);
-            });
+                            //Create the database if it doesn't already exist
+                            command.CommandText = "PRAGMA foreign_keys = ON;";
+                            _ = command.ExecuteNonQuery();
+                            _ = builder.UseSqlite(connection);
+                        });
+
+                        return context;
+                    };
+                });
+
+#pragma warning disable CA2000 // Dispose objects before losing scope
+            }).AddSingleton<IMemoryCache>(new MemoryCache(new MemoryCacheOptions()));
 #pragma warning restore CA2000 // Dispose objects before losing scope
 
-            using var memoryCache = new MemoryCache(new MemoryCacheOptions());
-            using var logger = new DatabaseLogger("test", new DatabaseLoggerOptions(() => context), memoryCache);
+            var serviceProvider = serviceCollection.BuildServiceProvider();
+            var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
+            var logger = loggerFactory.CreateLogger<TestClass>();
+
             logger.LogInformation("Test {Hi}", 123);
 
             await Task.Delay(1000).ConfigureAwait(false);
+
         }
+    }
+
+    public class TestClass
+    {
+
     }
 }
