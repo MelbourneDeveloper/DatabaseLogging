@@ -1,16 +1,23 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace DatabaseLogging.Db
 {
     public class LogPropertyKey
     {
-        public LogPropertyKey(Guid key, string keyName)
+        public LogPropertyKey() : this(Guid.NewGuid())
+        {
+
+        }
+
+        public LogPropertyKey(Guid key, string keyName = "")
         {
             Key = key;
             KeyName = keyName;
         }
 
-        public Guid Key { get; }
-        public string KeyName { get; }
+        [Key]
+        public Guid Key { get; set; }
+        public string KeyName { get; set; }
     }
 }

@@ -14,7 +14,8 @@ namespace DatabaseLogging.Tests
         [TestMethod]
         public async Task TestMethod1()
         {
-            using var context = new Context((builder) =>
+#pragma warning disable CA2000 // Dispose objects before losing scope
+            var context = new Context((builder) =>
             {
                 var connection = new SqliteConnection("Data Source=Log.db");
                 connection.Open();
@@ -26,6 +27,7 @@ namespace DatabaseLogging.Tests
                 _ = command.ExecuteNonQuery();
                 _ = builder.UseSqlite(connection);
             });
+#pragma warning restore CA2000 // Dispose objects before losing scope
 
             using var memoryCache = new MemoryCache(new MemoryCacheOptions());
             using var logger = new DatabaseLogger(context, System.Threading.ThreadPriority.Highest, memoryCache);

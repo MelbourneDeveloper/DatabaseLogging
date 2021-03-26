@@ -5,7 +5,12 @@ namespace DatabaseLogging.Db
 {
     public class LogPropertyValue
     {
-        public LogPropertyValue(Guid key, Guid logPropertyKeyKey, bool isScopedProperty, string value)
+        public LogPropertyValue() : this(Guid.NewGuid())
+        {
+
+        }
+
+        public LogPropertyValue(Guid key, Guid logPropertyKeyKey = default, bool isScopedProperty = false, string value = "")
         {
             Key = key;
             LogPropertyKeyKey = logPropertyKeyKey;
@@ -14,9 +19,9 @@ namespace DatabaseLogging.Db
         }
 
         [Key]
-        public Guid Key { get; }
-        public Guid LogPropertyKeyKey { get; }
-        public string Value { get; }
-        public bool IsScopedProperty { get; }
+        public Guid Key { get; set; }
+        public Guid LogPropertyKeyKey { get; set; }
+        public string Value { get; set; }
+        public bool IsScopedProperty { get; set; }
     }
 }

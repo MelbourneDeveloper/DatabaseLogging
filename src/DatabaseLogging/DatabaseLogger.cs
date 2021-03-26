@@ -106,7 +106,15 @@ namespace DatabaseLogging
                 logProperties = ImmutableList.Create(kvps.Select(kvp => new LogPropertyRecord(kvp.Key, kvp.Value.ToString())).ToArray());
             }
 
-            pendingLogs.Enqueue(new LogMessageRecord(logLevel, eventId.Id, eventId.Name, exception?.ToString(), message, DateTimeOffset.UtcNow, logProperties));
+            pendingLogs.Enqueue(new LogMessageRecord(
+                logLevel,
+                eventId.Id,
+                //Why does NRT not pick this up as possibly null? Another NRT bug?
+                eventId.Name ?? "",
+                exception?.ToString(),
+                message,
+                DateTimeOffset.UtcNow,
+                logProperties));
         }
 
 #pragma warning disable CA1063 // Implement IDisposable Correctly
