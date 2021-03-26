@@ -11,21 +11,15 @@ namespace DatabaseLogging
 #pragma warning restore CA1063 // Implement IDisposable Correctly
     {
         private readonly ConcurrentDictionary<string, DatabaseLogger> _loggers = new ConcurrentDictionary<string, DatabaseLogger>();
-        private IDatabaseLoggerSettings _settings;
-        private bool _includeScopes;
-        Func<Context> getContext;
+        private IDatabaseLoggerSettings settings;
         IMemoryCache memoryCache;
 
         public DatabaseLoggerProvider(
-            bool includeScopes,
-            Func<Context> getContext,
             IMemoryCache memoryCache,
             IDatabaseLoggerSettings settings)
         {
-            _includeScopes = includeScopes;
-            this.getContext = getContext;
             this.memoryCache = memoryCache;
-            _settings = settings;
+            this.settings = settings;
         }
 
         public ILogger CreateLogger(string categoryName)
@@ -36,9 +30,7 @@ namespace DatabaseLogging
 
         private DatabaseLogger CreateLoggerImplementation(string name)
         {
-            var includeScopes = _settings?.IncludeScopes ?? _includeScopes;
-
-            return new DatabaseLogger(name, getContext(), _settings?.ThreadPriority ?? System.Threading.ThreadPriority.BelowNormal, memoryCache);
+            return new DatabaseLogger(name, settings, memoryCache);
         }
 
 #pragma warning disable CA1063 // Implement IDisposable Correctly

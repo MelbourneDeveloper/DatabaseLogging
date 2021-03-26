@@ -17,20 +17,22 @@ namespace DatabaseLogging
         private readonly Queue<LogMessageRecord> pendingLogs = new();
         private bool disposed;
         private IMemoryCache memoryCache;
+        IDatabaseLoggerSettings settings;
         Context context;
 
         public string Name { get; }
 
         public DatabaseLogger(
             string name,
-            Context context,
-            ThreadPriority threadPriority,
+            IDatabaseLoggerSettings settings,
             IMemoryCache memoryCache)
         {
+
+            this.settings = settings ?? throw new ArgumentNullException(nameof(settings));
             Name = name;
-            this.context = context;
+            context = settings.GetDatabaseContext();
             this.memoryCache = memoryCache;
-            new Thread(ProcessLogs) { Priority = threadPriority }.Start();
+            new Thread(ProcessLogs) { Priority = settings.ThreadPriority }.Start();
         }
 
         private void ProcessLogs(object obj)
