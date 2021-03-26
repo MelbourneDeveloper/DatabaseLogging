@@ -24,21 +24,12 @@ namespace DatabaseLogging.Tests
                     {
                         var context = new Context((builder) =>
                         {
-                            var connection = new SqliteConnection("Data Source=Log.db");
-                            connection.Open();
-
-                            var command = connection.CreateCommand();
-
-                            //Create the database if it doesn't already exist
-                            command.CommandText = "PRAGMA foreign_keys = ON;";
-                            _ = command.ExecuteNonQuery();
-                            _ = builder.UseSqlite(connection);
+                            builder.UseSqlServer("Server=(local);Database=Logging;Trusted_Connection=True;MultipleActiveResultSets=true");
                         });
 
                         return context;
                     };
                 });
-
             });
 
             var serviceProvider = serviceCollection.BuildServiceProvider();

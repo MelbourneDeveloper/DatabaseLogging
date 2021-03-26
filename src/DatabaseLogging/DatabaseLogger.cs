@@ -166,7 +166,7 @@ namespace DatabaseLogging
                 }
                 else
                 {
-                    Thread.Sleep(10);
+                    Thread.Sleep(settings.ProcessingDelay);
                 }
             }
         }
