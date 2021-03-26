@@ -39,7 +39,7 @@ namespace DatabaseLogging
 
                     var logEvent = memoryCache.GetOrCreate($"{nameof(LogEvent)}-{logMessageRecord.EventId}", (entry) =>
                      {
-                         var logEvent = context.LogEvents.First(lpk => lpk.Id == logMessageRecord.EventId);
+                         var logEvent = context.LogEvents.FirstOrDefault(lpk => lpk.Id == logMessageRecord.EventId);
 
                          if (logEvent != null) return logEvent;
 
@@ -64,7 +64,7 @@ namespace DatabaseLogging
                                 Guid.NewGuid(),
                                 memoryCache.GetOrCreate($"{nameof(LogPropertyKey)}-{lp.Key}", (entry) =>
                                 {
-                                    var logPropertyKey = context.LogPropertyKeys.First(lpk => lpk.KeyName == lp.Key);
+                                    var logPropertyKey = context.LogPropertyKeys.FirstOrDefault(lpk => lpk.KeyName == lp.Key);
 
                                     if (logPropertyKey != null) return logPropertyKey;
 
