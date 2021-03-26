@@ -8,7 +8,7 @@ namespace DatabaseLogging.Model
     (
          LogLevel LogLevel,
          int EventId,
-         string? EventName,
+         string EventName,
          string? Exception,
          string Message,
          DateTimeOffset LogDateTime,

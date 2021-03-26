@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Caching.Memory;
+﻿using DatabaseLogging.Db;
+using DatabaseLogging.Model;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -12,7 +14,7 @@ namespace DatabaseLogging
     public class DatabaseLogger : ILogger, IDisposable
 #pragma warning restore CA1063 // Implement IDisposable Correctly
     {
-        private readonly Queue<LogMessage> pendingLogs = new();
+        private readonly Queue<LogMessageRecord> pendingLogs = new();
         private bool disposed;
         private IMemoryCache memoryCache;
         Context context;
@@ -33,8 +35,52 @@ namespace DatabaseLogging
             {
                 if (pendingLogs.Count > 0)
                 {
-                    var logMessage = pendingLogs.Dequeue();
-                    context.Add(logMessage);
+                    var logMessageRecord = pendingLogs.Dequeue();
+
+                    var logEvent = memoryCache.GetOrCreate($"{nameof(LogEvent)}-{logMessageRecord.EventId}", (entry) =>
+                     {
+                         var logEvent = context.LogEvents.First(lpk => lpk.Id == logMessageRecord.EventId);
+
+                         if (logEvent != null) return logEvent;
+
+                         logEvent = new LogEvent { Key = Guid.NewGuid(), Id = logMessageRecord.EventId, Name = logMessageRecord.EventName };
+
+                         context.LogEvents.Add(logEvent);
+
+                         return logEvent;
+                     });
+
+                    var logMessage = new LogMessage(
+                        Guid.NewGuid(),
+                        logMessageRecord.LogLevel,
+                        logEvent.Key,
+                        logMessageRecord.Exception,
+                        logMessageRecord.Message,
+                        logMessageRecord.LogDateTime,
+                        ImmutableList.Create
+                        (
+                            logMessageRecord.LogProperties.Select(lp => new LogPropertyValue
+                            (
+                                Guid.NewGuid(),
+                                memoryCache.GetOrCreate($"{nameof(LogPropertyKey)}-{lp.Key}", (entry) =>
+                                {
+                                    var logPropertyKey = context.LogPropertyKeys.First(lpk => lpk.KeyName == lp.Key);
+
+                                    if (logPropertyKey != null) return logPropertyKey;
+
+                                    logPropertyKey = new LogPropertyKey(Guid.NewGuid(), lp.Key);
+
+                                    context.LogPropertyKeys.Add(logPropertyKey);
+
+                                    return logPropertyKey;
+                                }).Key, false, lp.Value
+                                )).ToArray()
+                            )
+                        );
+
+                    //context.Add(logMessage);
+
+
                     context.SaveChanges();
                 }
                 else
@@ -57,45 +103,14 @@ namespace DatabaseLogging
 
             var message = formatter(state, exception);
 
-            var logProperties = ImmutableList<LogPropertyValue>.Empty;
+            var logProperties = ImmutableList<LogPropertyRecord>.Empty;
 
             if (state is IReadOnlyList<KeyValuePair<string, object>> kvps)
             {
-                foreach (var kvp in kvps)
-                {
-                    memoryCache.GetOrCreate($"{nameof(LogPropertyKey)}-{kvp.Key}", (entry) =>
-                    {
-                        var logPropertyKey = context.LogPropertyKeys.First(lpk => lpk.KeyName == kvp.Key);
-
-                        if (logPropertyKey != null) return logPropertyKey;
-
-                        logPropertyKey = new LogPropertyKey(Guid.NewGuid(), kvp.Key);
-
-                        context.LogPropertyKeys.Add(logPropertyKey);
-
-                        return logPropertyKey;
-                    }
-                    );
-                }
-
-
-                logProperties = ImmutableList.Create(kvps.Select(kvp => new LogPropertyValue(Guid.NewGuid(),
-                memoryCache.GetOrCreate($"{nameof(LogPropertyKey)}-{kvp.Key}", (entry) =>
-                {
-                    var logPropertyKey = context.LogPropertyKeys.First(lpk => lpk.KeyName == kvp.Key);
-
-                    if (logPropertyKey != null) return logPropertyKey;
-
-                    logPropertyKey = new LogPropertyKey(Guid.NewGuid(), kvp.Key);
-
-                    context.LogPropertyKeys.Add(logPropertyKey);
-
-                    return logPropertyKey;
-                }
-                ).Key, kvp.Value.ToString())).ToArray());
+                logProperties = ImmutableList.Create(kvps.Select(kvp => new LogPropertyRecord(kvp.Key, kvp.Value.ToString())).ToArray());
             }
 
-            pendingLogs.Enqueue(new LogMessage(Guid.NewGuid(), logLevel, eventId.Id, exception?.ToString(), message, DateTimeOffset.UtcNow, logProperties));
+            pendingLogs.Enqueue(new LogMessageRecord(logLevel, eventId.Id, eventId.Name, exception?.ToString(), message, DateTimeOffset.UtcNow, logProperties));
         }
 
 #pragma warning disable CA1063 // Implement IDisposable Correctly

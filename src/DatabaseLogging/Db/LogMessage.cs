@@ -11,7 +11,7 @@ namespace DatabaseLogging
             (
          Guid key,
          LogLevel logLevel,
-         int eventId,
+         Guid eventIdKey,
          string? exception,
          string message,
          DateTimeOffset logDateTime,
@@ -20,7 +20,7 @@ namespace DatabaseLogging
         {
             Key = key;
             LogLevel = logLevel;
-            EventId = eventId;
+            EventIdKey = eventIdKey;
             Exception = exception;
             Message = message;
             LogDateTime = logDateTime;
@@ -30,7 +30,7 @@ namespace DatabaseLogging
         [Key]
         public Guid Key { get; }
         public LogLevel LogLevel { get; }
-        public int EventId { get; }
+        public Guid EventIdKey { get; }
         public string? Exception { get; }
         public string Message { get; }
         public DateTimeOffset LogDateTime { get; }

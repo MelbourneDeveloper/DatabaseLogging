@@ -1,0 +1,7 @@
+﻿[*.cs]
+
+# CA1823: Avoid unused private fields
+dotnet_diagnostic.CA1014.severity = none
+
+# IDE0051: Remove unused private members
+dotnet_diagnostic.IDE0051.severity = error
