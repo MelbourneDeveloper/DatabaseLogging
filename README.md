@@ -8,7 +8,7 @@ PS: Your app doesn't need to ASP.NET Core. You just have to use `Microsoft.Exten
 
 - Add Nuget `DatabaseLogging` (currently alpha so be sure to include pre-release)
 - Add the Entity Framework NuGet for the database you want to use. (E.g. `Microsoft.EntityFrameworkCore.Sqlite` or 'Microsoft.EntityFrameworkCore.SqlServer')
-- Call AddDatabase and initialize the `DbContext` with code for the database platform
+- Call `AddDatabase` and initialize the `DbContext` with code for the database platform
 
 ### SQL Server
 
