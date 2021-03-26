@@ -6,7 +6,9 @@ using System.Collections.Concurrent;
 
 namespace DatabaseLogging
 {
+#pragma warning disable CA1063 // Implement IDisposable Correctly
     public class DatabaseLoggerProvider : ILoggerProvider
+#pragma warning restore CA1063 // Implement IDisposable Correctly
     {
         private readonly ConcurrentDictionary<string, DatabaseLogger> _loggers = new ConcurrentDictionary<string, DatabaseLogger>();
         private IDatabaseLoggerSettings _settings;

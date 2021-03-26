@@ -2,7 +2,7 @@
 
 namespace DatabaseLogging
 {
-    internal class DatabaseLoggerSettings : IDatabaseLoggerSettings
+    public class DatabaseLoggerSettings : IDatabaseLoggerSettings
     {
         public bool? IncludeScopes { get; set; }
 
