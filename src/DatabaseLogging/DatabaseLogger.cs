@@ -17,7 +17,7 @@ namespace DatabaseLogging
         private readonly Queue<LogMessageRecord> pendingLogs = new();
         private bool disposed;
         private IMemoryCache memoryCache;
-        IDatabaseLoggerOptions settings;
+        internal IDatabaseLoggerOptions settings;
         Context context;
 
         public string Name { get; }

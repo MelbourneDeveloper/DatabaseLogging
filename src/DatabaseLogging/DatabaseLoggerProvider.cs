@@ -1,24 +1,42 @@
 ﻿using DatabaseLogging.Db;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using System;
 using System.Collections.Concurrent;
+
+#pragma warning disable CA1063 // Implement IDisposable Correctly
 
 namespace DatabaseLogging
 {
-#pragma warning disable CA1063 // Implement IDisposable Correctly
-    public class DatabaseLoggerProvider : ILoggerProvider
+    public class DatabaseLoggerProvider : ILoggerProvider, IDisposable
 #pragma warning restore CA1063 // Implement IDisposable Correctly
     {
         private readonly ConcurrentDictionary<string, DatabaseLogger> _loggers = new ConcurrentDictionary<string, DatabaseLogger>();
-        private IDatabaseLoggerOptions settings;
-        IMemoryCache memoryCache;
+        private IDatabaseLoggerOptions options;
+        private IDisposable? optionsReloadToken;
+#pragma warning disable CA2213 // Disposable fields should be disposed
+        private readonly IMemoryCache memoryCache;
+#pragma warning restore CA2213 // Disposable fields should be disposed
 
-        public DatabaseLoggerProvider(
-            IMemoryCache memoryCache,
-            IDatabaseLoggerOptions settings)
+        public DatabaseLoggerProvider(IOptionsMonitor<DatabaseLoggerOptions> options)
         {
-            this.memoryCache = memoryCache;
-            this.settings = settings;
+            this.options = options?.CurrentValue ?? throw new InvalidOperationException();
+            memoryCache = new MemoryCache(new MemoryCacheOptions());
+
+            // Filter would be applied on LoggerFactory level
+            optionsReloadToken = options.OnChange(ReloadLoggerOptions);
+            ReloadLoggerOptions(options.CurrentValue);
+        }
+
+        private void ReloadLoggerOptions(DatabaseLoggerOptions options)
+        {
+            this.options = options;
+
+            foreach (var logger in _loggers.Values)
+            {
+                logger.settings = options;
+            }
         }
 
         public ILogger CreateLogger(string categoryName)
@@ -29,7 +47,7 @@ namespace DatabaseLogging
 
         private DatabaseLogger CreateLoggerImplementation(string name)
         {
-            return new DatabaseLogger(name, settings, memoryCache);
+            return new DatabaseLogger(name, options, memoryCache);
         }
 
 #pragma warning disable CA1063 // Implement IDisposable Correctly
@@ -38,6 +56,7 @@ namespace DatabaseLogging
 #pragma warning restore CA1816 // Dispose methods should call SuppressFinalize
 #pragma warning restore CA1063 // Implement IDisposable Correctly
         {
+            optionsReloadToken?.Dispose();
         }
     }
 }
