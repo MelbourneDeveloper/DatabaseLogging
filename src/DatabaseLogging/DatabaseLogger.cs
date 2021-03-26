@@ -17,14 +17,14 @@ namespace DatabaseLogging
         private readonly Queue<LogMessageRecord> pendingLogs = new();
         private bool disposed;
         private IMemoryCache memoryCache;
-        IDatabaseLoggerSettings settings;
+        IDatabaseLoggerOptions settings;
         Context context;
 
         public string Name { get; }
 
         public DatabaseLogger(
             string name,
-            IDatabaseLoggerSettings settings,
+            IDatabaseLoggerOptions settings,
             IMemoryCache memoryCache)
         {
 

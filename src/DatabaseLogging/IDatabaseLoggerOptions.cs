@@ -4,7 +4,7 @@ using System.Threading;
 
 namespace DatabaseLogging
 {
-    public interface IDatabaseLoggerSettings
+    public interface IDatabaseLoggerOptions
     {
         bool IncludeScopes { get; } 
         ThreadPriority ThreadPriority { get; }

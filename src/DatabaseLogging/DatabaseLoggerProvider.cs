@@ -1,7 +1,6 @@
 ﻿using DatabaseLogging.Db;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Concurrent;
 
 namespace DatabaseLogging
@@ -11,12 +10,12 @@ namespace DatabaseLogging
 #pragma warning restore CA1063 // Implement IDisposable Correctly
     {
         private readonly ConcurrentDictionary<string, DatabaseLogger> _loggers = new ConcurrentDictionary<string, DatabaseLogger>();
-        private IDatabaseLoggerSettings settings;
+        private IDatabaseLoggerOptions settings;
         IMemoryCache memoryCache;
 
         public DatabaseLoggerProvider(
             IMemoryCache memoryCache,
-            IDatabaseLoggerSettings settings)
+            IDatabaseLoggerOptions settings)
         {
             this.memoryCache = memoryCache;
             this.settings = settings;

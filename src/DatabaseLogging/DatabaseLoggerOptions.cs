@@ -4,9 +4,9 @@ using System.Threading;
 
 namespace DatabaseLogging
 {
-    public class DatabaseLoggerSettings : IDatabaseLoggerSettings
+    public class DatabaseLoggerOptions : IDatabaseLoggerOptions
     {
-        public DatabaseLoggerSettings(Func<Context> getDatabaseContext)
+        public DatabaseLoggerOptions(Func<Context> getDatabaseContext)
         {
             GetDatabaseContext = getDatabaseContext;
         }
