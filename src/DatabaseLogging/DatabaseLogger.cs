@@ -78,8 +78,7 @@ namespace DatabaseLogging
                             )
                         );
 
-                    //context.Add(logMessage);
-
+                    context.LogMessages.Add(logMessage);
 
                     context.SaveChanges();
                 }

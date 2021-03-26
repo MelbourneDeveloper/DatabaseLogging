@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace DatabaseLogging
+namespace DatabaseLogging.Db
 {
     public class LogPropertyValue
     {

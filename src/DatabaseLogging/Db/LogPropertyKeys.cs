@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace DatabaseLogging
+namespace DatabaseLogging.Db
 {
     public class LogPropertyKeys : DbSet<LogPropertyKey>
     {

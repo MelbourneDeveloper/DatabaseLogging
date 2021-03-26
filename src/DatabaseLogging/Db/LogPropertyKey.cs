@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DatabaseLogging
+namespace DatabaseLogging.Db
 {
     public class LogPropertyKey
     {

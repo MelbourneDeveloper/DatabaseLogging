@@ -8,6 +8,6 @@ namespace DatabaseLogging.Db
         [Key]
         public Guid Key { get; set; }
         public int Id { get; set; }
-        public string Name { get; set; }
+        public string Name { get; set; } = "";
     }
 }

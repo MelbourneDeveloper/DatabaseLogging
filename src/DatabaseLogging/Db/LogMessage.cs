@@ -3,7 +3,7 @@ using System;
 using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 
-namespace DatabaseLogging
+namespace DatabaseLogging.Db
 {
     public class LogMessage
     {
