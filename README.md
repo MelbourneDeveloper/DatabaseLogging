@@ -4,9 +4,21 @@ Send ASP.NET Core logs to any Entity Framework database (`ILogger` / `ILoggerFac
 
 PS: Your app doesn't need to ASP.NET Core. You just have to use `Microsoft.Extensions.Logging`
 
+## Why?
+
+- Log to the database in your development environment and query the results. There is no need to sift through pages of log files. This gives you similar functionality to Application Insights.
+
+- Record your logs in pipelines with SQLite and query the results afterwards
+
+- Write to an SQLite log on Android or iOS so you can easily query the data afterwards
+
+- No need for non-standard config with systems like NLog, log4net or Serilog
+
+- Log to unstructured databases (No SQL) like Cosmos Db with [Entity Framework](https://docs.microsoft.com/en-us/ef/core/providers/cosmos/?tabs=dotnet-core-cli)
+
 ## Quick Start
 
-- Add Nuget `DatabaseLogging` (currently alpha so be sure to include pre-release)
+- Add Nuget `DatabaseLogging` (currently alpha, so be sure to include pre-release)
 - Add the Entity Framework NuGet for the database you want to use. (E.g. `Microsoft.EntityFrameworkCore.Sqlite` or 'Microsoft.EntityFrameworkCore.SqlServer')
 - Call `AddDatabase` and initialize the `DbContext` with code for the database platform
 
