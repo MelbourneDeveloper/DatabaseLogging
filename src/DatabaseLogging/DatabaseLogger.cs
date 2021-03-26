@@ -19,21 +19,26 @@ namespace DatabaseLogging
         private IMemoryCache memoryCache;
         internal IDatabaseLoggerOptions settings;
         Context context;
+        internal IExternalScopeProvider ScopeProvider { get; set; }
 
         public string Name { get; }
 
         public DatabaseLogger(
             string name,
             IDatabaseLoggerOptions settings,
-            IMemoryCache memoryCache)
+            IMemoryCache memoryCache,
+            IExternalScopeProvider externalScopeProvider)
         {
 
+            ScopeProvider = externalScopeProvider;
             this.settings = settings ?? throw new ArgumentNullException(nameof(settings));
             Name = name;
             context = settings.GetDatabaseContext();
             this.memoryCache = memoryCache;
             new Thread(ProcessLogs) { Priority = settings.ThreadPriority }.Start();
         }
+
+        public IDisposable BeginScope<TState>(TState state) => ScopeProvider?.Push(state) ?? NullScope.Instance;
 
         private void ProcessLogs(object obj)
         {
@@ -93,11 +98,6 @@ namespace DatabaseLogging
             }
         }
 
-        public IDisposable BeginScope<TState>(TState state)
-        {
-            return new NullDisposable();
-        }
-
         public bool IsEnabled(LogLevel logLevel) => true;
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
@@ -133,5 +133,4 @@ namespace DatabaseLogging
             disposed = true;
         }
     }
-
 }

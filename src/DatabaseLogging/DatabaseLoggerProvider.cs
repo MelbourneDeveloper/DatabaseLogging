@@ -9,9 +9,10 @@ using System.Collections.Concurrent;
 
 namespace DatabaseLogging
 {
-    public class DatabaseLoggerProvider : ILoggerProvider, IDisposable
+    public class DatabaseLoggerProvider : ILoggerProvider, IDisposable, ISupportExternalScope
 #pragma warning restore CA1063 // Implement IDisposable Correctly
     {
+        IExternalScopeProvider scopeProvider;
         private readonly ConcurrentDictionary<string, DatabaseLogger> _loggers = new ConcurrentDictionary<string, DatabaseLogger>();
         private IDatabaseLoggerOptions options;
         private IDisposable? optionsReloadToken;
@@ -19,8 +20,9 @@ namespace DatabaseLogging
         private readonly IMemoryCache memoryCache;
 #pragma warning restore CA2213 // Disposable fields should be disposed
 
-        public DatabaseLoggerProvider(IOptionsMonitor<DatabaseLoggerOptions> options)
+        public DatabaseLoggerProvider(IOptionsMonitor<DatabaseLoggerOptions> options, IExternalScopeProvider externalScopeProvider)
         {
+            this.scopeProvider = externalScopeProvider ?? new LoggerExternalScopeProvider();
             this.options = options?.CurrentValue ?? throw new InvalidOperationException();
             memoryCache = new MemoryCache(new MemoryCacheOptions());
 
@@ -47,7 +49,7 @@ namespace DatabaseLogging
 
         private DatabaseLogger CreateLoggerImplementation(string name)
         {
-            return new DatabaseLogger(name, options, memoryCache);
+            return new DatabaseLogger(name, options, memoryCache, scopeProvider);
         }
 
 #pragma warning disable CA1063 // Implement IDisposable Correctly
@@ -57,6 +59,11 @@ namespace DatabaseLogging
 #pragma warning restore CA1063 // Implement IDisposable Correctly
         {
             optionsReloadToken?.Dispose();
+        }
+
+        public void SetScopeProvider(IExternalScopeProvider scopeProvider)
+        {
+            this.scopeProvider = scopeProvider;
         }
     }
 }

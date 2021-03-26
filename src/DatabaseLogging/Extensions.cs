@@ -27,6 +27,10 @@ namespace DatabaseLogging
 
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<ILoggerProvider, DatabaseLoggerProvider>());
             LoggerProviderOptions.RegisterProviderOptions<DatabaseLoggerOptions, DatabaseLoggerProvider>(builder.Services);
+
+            //Is this good????
+            builder.Services.AddSingleton<IExternalScopeProvider, LoggerExternalScopeProvider>();
+
             return builder;
         }
     }
