@@ -10,18 +10,24 @@ using System.Threading;
 
 namespace DatabaseLogging
 {
-#pragma warning disable CA1063 // Implement IDisposable Correctly
     public class DatabaseLogger : ILogger, IDisposable
-#pragma warning restore CA1063 // Implement IDisposable Correctly
     {
+        #region Internal Fields
+
+        internal IDatabaseLoggerOptions settings;
+
+        #endregion Internal Fields
+
+        #region Private Fields
+
         private readonly Queue<LogMessageRecord> pendingLogs = new();
+        Context context;
         private bool disposed;
         private IMemoryCache memoryCache;
-        internal IDatabaseLoggerOptions settings;
-        Context context;
-        internal IExternalScopeProvider ScopeProvider { get; set; }
 
-        public string Name { get; }
+        #endregion Private Fields
+
+        #region Public Constructors
 
         public DatabaseLogger(
             string name,
@@ -38,7 +44,58 @@ namespace DatabaseLogging
             new Thread(ProcessLogs) { Priority = settings.ThreadPriority }.Start();
         }
 
+        #endregion Public Constructors
+
+        #region Public Properties
+
+        public string Name { get; }
+
+        #endregion Public Properties
+
+        #region Internal Properties
+
+        internal IExternalScopeProvider ScopeProvider { get; set; }
+
+        #endregion Internal Properties
+
+        #region Public Methods
+
         public IDisposable BeginScope<TState>(TState state) => ScopeProvider?.Push(state) ?? NullScope.Instance;
+
+        public void Dispose()
+        {
+            disposed = true;
+        }
+
+        public bool IsEnabled(LogLevel logLevel) => true;
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+        {
+            if (formatter == null) return;
+
+            var message = formatter(state, exception);
+
+            var logProperties = ImmutableList<LogPropertyRecord>.Empty;
+
+            if (state is IReadOnlyList<KeyValuePair<string, object>> kvps)
+            {
+                logProperties = ImmutableList.Create(kvps.Select(kvp => new LogPropertyRecord(kvp.Key, kvp.Value.ToString())).ToArray());
+            }
+
+            pendingLogs.Enqueue(new LogMessageRecord(
+                logLevel,
+                eventId.Id,
+                //Why does NRT not pick this up as possibly null? Another NRT bug?
+                eventId.Name ?? "",
+                exception?.ToString(),
+                message,
+                DateTimeOffset.UtcNow,
+                logProperties));
+        }
+
+        #endregion Public Methods
+
+        #region Private Methods
 
         private void ProcessLogs(object obj)
         {
@@ -98,39 +155,6 @@ namespace DatabaseLogging
             }
         }
 
-        public bool IsEnabled(LogLevel logLevel) => true;
-
-        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
-        {
-            if (formatter == null) return;
-
-            var message = formatter(state, exception);
-
-            var logProperties = ImmutableList<LogPropertyRecord>.Empty;
-
-            if (state is IReadOnlyList<KeyValuePair<string, object>> kvps)
-            {
-                logProperties = ImmutableList.Create(kvps.Select(kvp => new LogPropertyRecord(kvp.Key, kvp.Value.ToString())).ToArray());
-            }
-
-            pendingLogs.Enqueue(new LogMessageRecord(
-                logLevel,
-                eventId.Id,
-                //Why does NRT not pick this up as possibly null? Another NRT bug?
-                eventId.Name ?? "",
-                exception?.ToString(),
-                message,
-                DateTimeOffset.UtcNow,
-                logProperties));
-        }
-
-#pragma warning disable CA1063 // Implement IDisposable Correctly
-#pragma warning disable CA1816 // Dispose methods should call SuppressFinalize
-        public void Dispose()
-#pragma warning restore CA1816 // Dispose methods should call SuppressFinalize
-#pragma warning restore CA1063 // Implement IDisposable Correctly
-        {
-            disposed = true;
-        }
+        #endregion Private Methods
     }
 }

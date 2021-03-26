@@ -5,20 +5,24 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Concurrent;
 
-#pragma warning disable CA1063 // Implement IDisposable Correctly
 
 namespace DatabaseLogging
 {
     public class DatabaseLoggerProvider : ILoggerProvider, IDisposable, ISupportExternalScope
-#pragma warning restore CA1063 // Implement IDisposable Correctly
     {
-        IExternalScopeProvider scopeProvider;
+        #region Private Fields
+
         private readonly ConcurrentDictionary<string, DatabaseLogger> _loggers = new ConcurrentDictionary<string, DatabaseLogger>();
-        private IDatabaseLoggerOptions options;
-        private IDisposable? optionsReloadToken;
 #pragma warning disable CA2213 // Disposable fields should be disposed
         private readonly IMemoryCache memoryCache;
 #pragma warning restore CA2213 // Disposable fields should be disposed
+        private IDatabaseLoggerOptions options;
+        private IDisposable? optionsReloadToken;
+        IExternalScopeProvider scopeProvider;
+
+        #endregion Private Fields
+
+        #region Public Constructors
 
         public DatabaseLoggerProvider(IOptionsMonitor<DatabaseLoggerOptions> options, IExternalScopeProvider externalScopeProvider)
         {
@@ -31,6 +35,35 @@ namespace DatabaseLogging
             ReloadLoggerOptions(options.CurrentValue);
         }
 
+        #endregion Public Constructors
+
+        #region Public Methods
+
+        public ILogger CreateLogger(string categoryName)
+        {
+            var databaseLoggerProvider = _loggers.GetOrAdd(categoryName, CreateLoggerImplementation);
+            return databaseLoggerProvider;
+        }
+
+        public void Dispose()
+        {
+            optionsReloadToken?.Dispose();
+        }
+
+        public void SetScopeProvider(IExternalScopeProvider scopeProvider)
+        {
+            this.scopeProvider = scopeProvider;
+        }
+
+        #endregion Public Methods
+
+        #region Private Methods
+
+        private DatabaseLogger CreateLoggerImplementation(string name)
+        {
+            return new DatabaseLogger(name, options, memoryCache, scopeProvider);
+        }
+
         private void ReloadLoggerOptions(DatabaseLoggerOptions options)
         {
             this.options = options;
@@ -41,29 +74,6 @@ namespace DatabaseLogging
             }
         }
 
-        public ILogger CreateLogger(string categoryName)
-        {
-            var databaseLoggerProvider = _loggers.GetOrAdd(categoryName, CreateLoggerImplementation);
-            return databaseLoggerProvider;
-        }
-
-        private DatabaseLogger CreateLoggerImplementation(string name)
-        {
-            return new DatabaseLogger(name, options, memoryCache, scopeProvider);
-        }
-
-#pragma warning disable CA1063 // Implement IDisposable Correctly
-#pragma warning disable CA1816 // Dispose methods should call SuppressFinalize
-        public void Dispose()
-#pragma warning restore CA1816 // Dispose methods should call SuppressFinalize
-#pragma warning restore CA1063 // Implement IDisposable Correctly
-        {
-            optionsReloadToken?.Dispose();
-        }
-
-        public void SetScopeProvider(IExternalScopeProvider scopeProvider)
-        {
-            this.scopeProvider = scopeProvider;
-        }
+        #endregion Private Methods
     }
 }
