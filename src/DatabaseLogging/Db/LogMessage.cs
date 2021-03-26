@@ -8,7 +8,7 @@ namespace DatabaseLogging.Db
 {
     public class LogMessage
     {
-        public LogMessage() : this(Guid.NewGuid(), LogLevel.Trace, default, null, "", DateTimeOffset.UtcNow, new List<LogPropertyValue>())
+        public LogMessage() : this(Guid.NewGuid(), "", LogLevel.Trace, default, null, "", DateTimeOffset.UtcNow, new List<LogPropertyValue>())
         {
             Message = "";
         }
@@ -16,6 +16,7 @@ namespace DatabaseLogging.Db
         public LogMessage
             (
          Guid key,
+         string name,
          LogLevel logLevel,
          Guid logEventKey,
          string? exception,
@@ -27,6 +28,7 @@ namespace DatabaseLogging.Db
             )
         {
             Key = key;
+            Name = name;
             LogLevel = logLevel;
             LogEventKey = logEventKey;
             Exception = exception;
@@ -37,6 +39,7 @@ namespace DatabaseLogging.Db
 
         [Key]
         public Guid Key { get; set; }
+        public string Name { get; set; }
         public LogLevel LogLevel { get; set; }
         [ForeignKey("LogEvent")]
         public Guid LogEventKey { get; set; }

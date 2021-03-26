@@ -30,7 +30,7 @@ namespace DatabaseLogging.Tests
 #pragma warning restore CA2000 // Dispose objects before losing scope
 
             using var memoryCache = new MemoryCache(new MemoryCacheOptions());
-            using var logger = new DatabaseLogger(context, System.Threading.ThreadPriority.Highest, memoryCache);
+            using var logger = new DatabaseLogger("test", context, System.Threading.ThreadPriority.Highest, memoryCache);
             logger.LogInformation("Test {Hi}", 123);
 
             await Task.Delay(1000).ConfigureAwait(false);

@@ -19,11 +19,15 @@ namespace DatabaseLogging
         private IMemoryCache memoryCache;
         Context context;
 
+        public string Name { get; }
+
         public DatabaseLogger(
+            string name,
             Context context,
             ThreadPriority threadPriority,
             IMemoryCache memoryCache)
         {
+            Name = name;
             this.context = context;
             this.memoryCache = memoryCache;
             new Thread(ProcessLogs) { Priority = threadPriority }.Start();
@@ -52,6 +56,7 @@ namespace DatabaseLogging
 
                     var logMessage = new LogMessage(
                         Guid.NewGuid(),
+                        Name,
                         logMessageRecord.LogLevel,
                         logEvent.Key,
                         logMessageRecord.Exception,
