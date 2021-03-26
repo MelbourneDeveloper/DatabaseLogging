@@ -4,6 +4,8 @@ Send ASP.NET Core logs to any Entity Framework database (`ILogger` / `ILoggerFac
 
 PS: Your app doesn't need to ASP.NET Core. You just have to use `Microsoft.Extensions.Logging`
 
+This is in alpha so looking PRs to add unit tests, and improvements. Feedback also welcome through the issues.
+
 ## Why?
 
 - Log to the database in your development environment and query the results. There is no need to sift through pages of log files. This gives you similar functionality to Application Insights.
