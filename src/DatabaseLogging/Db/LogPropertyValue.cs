@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DatabaseLogging.Db
 {
@@ -20,7 +21,9 @@ namespace DatabaseLogging.Db
 
         [Key]
         public Guid Key { get; set; }
+        [ForeignKey("LogPropertyKey")]
         public Guid LogPropertyKeyKey { get; set; }
+        public LogPropertyKey? LogPropertyKey { get; set; }
         public string Value { get; set; }
         public bool IsScopedProperty { get; set; }
     }

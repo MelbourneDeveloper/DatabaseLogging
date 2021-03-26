@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DatabaseLogging.Db
 {
@@ -16,7 +17,7 @@ namespace DatabaseLogging.Db
             (
          Guid key,
          LogLevel logLevel,
-         Guid eventIdKey,
+         Guid logEventKey,
          string? exception,
          string message,
          DateTimeOffset logDateTime,
@@ -27,7 +28,7 @@ namespace DatabaseLogging.Db
         {
             Key = key;
             LogLevel = logLevel;
-            EventIdKey = eventIdKey;
+            LogEventKey = logEventKey;
             Exception = exception;
             Message = message;
             LogDateTime = logDateTime;
@@ -37,7 +38,9 @@ namespace DatabaseLogging.Db
         [Key]
         public Guid Key { get; set; }
         public LogLevel LogLevel { get; set; }
-        public Guid EventIdKey { get; set; }
+        [ForeignKey("LogEvent")]
+        public Guid LogEventKey { get; set; }
+        public LogEvent? LogEvent { get; set; }
         public string? Exception { get; set; }
         public string Message { get; set; }
         public DateTimeOffset LogDateTime { get; set; }
