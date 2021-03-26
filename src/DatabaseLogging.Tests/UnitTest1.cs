@@ -39,18 +39,16 @@ namespace DatabaseLogging.Tests
                     };
                 });
 
-#pragma warning disable CA2000 // Dispose objects before losing scope
-            }).AddSingleton<IMemoryCache>(new MemoryCache(new MemoryCacheOptions()));
-#pragma warning restore CA2000 // Dispose objects before losing scope
+            });
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
             var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
             var logger = loggerFactory.CreateLogger<TestClass>();
 
+            //using var scope = logger.BeginScope("Scope: {someArg}", 456);
             logger.LogInformation("Test {Hi}", 123);
 
             await Task.Delay(1000).ConfigureAwait(false);
-
         }
     }
 

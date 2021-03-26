@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
@@ -30,6 +31,9 @@ namespace DatabaseLogging
 
             //Is this good????
             builder.Services.AddSingleton<IExternalScopeProvider, LoggerExternalScopeProvider>();
+#pragma warning disable CA2000 // Dispose objects before losing scope
+            builder.Services.AddSingleton<IMemoryCache>(new MemoryCache(new MemoryCacheOptions())); ;
+#pragma warning restore CA2000 // Dispose objects before losing scope
 
             return builder;
         }

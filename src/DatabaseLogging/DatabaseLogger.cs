@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Text;
 using System.Threading;
 
 namespace DatabaseLogging
@@ -117,6 +118,21 @@ namespace DatabaseLogging
 
                          return logEvent;
                      });
+
+                    //TODO: Add scope
+                    //var scopeProvider = ScopeProvider;
+                    //if (scopeProvider != null)
+                    //{
+                    //    var stringBuilder = new StringBuilder();
+                    //    var initialLength = stringBuilder.Length;
+
+                    //    scopeProvider.ForEachScope((scope, state) =>
+                    //    {
+                    //        var (builder, length) = state;
+                    //        var first = length == builder.Length;
+                    //        builder.Append(first ? "=> " : " => ").Append(scope);
+                    //    }, (stringBuilder, initialLength));                       
+                    //}
 
                     var logMessage = new LogMessage(
                         Guid.NewGuid(),
