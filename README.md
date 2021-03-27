@@ -21,8 +21,10 @@ This is in alpha so looking PRs to add unit tests, and improvements. Feedback al
 ## Quick Start
 
 - Add Nuget `DatabaseLogging` (currently alpha, so be sure to include pre-release)
-- Add the Entity Framework NuGet for the database you want to use. (E.g. `Microsoft.EntityFrameworkCore.Sqlite` or 'Microsoft.EntityFrameworkCore.SqlServer')
+- Add the Entity Framework NuGet for the database you want to use. (E.g. `Microsoft.EntityFrameworkCore.Sqlite` or `Microsoft.EntityFrameworkCore.SqlServer`)
 - Call `AddDatabase` and initialize the `DbContext` with code for the database platform
+
+Note: the `DbContext` will call `Database.EnsureCreated()` so the connection string needs to point to a database where this will succeed. It will probably need to be a clean database first time around
 
 ### SQL Server
 
