@@ -14,7 +14,7 @@ This is in alpha so looking PRs to add unit tests, and improvements. Feedback al
 
 - Write to an SQLite log on Android or iOS so you can easily query the data afterwards
 
-- No need for non-standard config with systems like NLog, log4net or Serilog
+- No bloat or need for non-standard config with systems like NLog, log4net or Serilog
 
 - Log to unstructured databases (No SQL) like Cosmos Db with [Entity Framework](https://docs.microsoft.com/en-us/ef/core/providers/cosmos/?tabs=dotnet-core-cli)
 
